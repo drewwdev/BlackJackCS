@@ -91,17 +91,48 @@ namespace BlackJackCS
                     deckDict.Add(card, 10);
             }
 
-            // Making sure all the cards exist in deckDict and that they are shuffled
-            foreach (var card in deckDict)
+            // Create a list for the house
+            var houseDeck = new List<string>() { };
+
+            // Starting hand for house
+            houseDeck.Add(deck[0]);
+            houseDeck.Add(deck[0]);
+
+            // Calculate house starting hand value
+            int houseFirstCard = deckDict[deck[0]];
+            int houseSecondCard = deckDict[deck[1]];
+            var houseTotalValue = houseFirstCard + houseSecondCard;
+
+            deckDict.Remove(deck[0]);
+            deckDict.Remove(deck[0]);
+
+            // Create a list for the player
+            var playerDeck = new List<string>() { };
+
+            // Starting hand for player
+            playerDeck.Add(deck[0]);
+            playerDeck.Add(deck[0]);
+
+            // Calculate player starting hand value
+            int playerFirstCard = deckDict[deck[0]];
+            int playerSecondCard = deckDict[deck[1]];
+            var playerTotalValue = playerFirstCard + playerSecondCard;
+
+            deckDict.Remove(deck[0]);
+            deckDict.Remove(deck[0]);
+
+            // Calculate the players current total hand
+            Console.WriteLine($"The player total is {playerTotalValue}");
+
+            // Ask the player if they want to hit or stand
+            Console.WriteLine("Does the player want to hit or stand?");
+            var userInput = Console.ReadLine();
+
+            if (userInput == "hit")
             {
-                Console.WriteLine(card);
+                playerDeck.Add(deck[0]);
+                playerDeck.Remove(deck[0]);
             }
-
-
-            Console.WriteLine("Let's play some Blackjack!");
-
-            // Create a dictionary for the house
-            var houseDeck = new Dictionary<string, int>() { };
         }
     }
 }
