@@ -1,151 +1,224 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BlackJackCS
+class Deck
+{
+    // shuffle
+}
+class Card
+{
+    public string Rank { get; set; }
+    public string Suit { get; set; }
+
+    public int Value()
+    {
+        switch (Rank)
+        {
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
+            case "10":
+                return int.Parse(Rank);
+            case "Jack":
+            case "Queen":
+            case "King":
+                return 10;
+            case "Ace":
+                return 11;
+            default:
+                return 0;
+        }
+    }
+
+    override public string ToString()
+    {
+        return ($"{Rank} of {Suit}");
+    }
+
+}
+
+class Hand
+{
+    public List<Card> CurrentCards { get; set; } = new List<Card>();
+
+    public int TotalValue()
+    {
+        var total = 0;
+        foreach (var card in CurrentCards)
+        {
+            total = total + card.Value();
+        }
+
+        return total;
+    }
+
+    public void AddCard(Card cardToAdd)
+    {
+        CurrentCards.Add(cardToAdd);
+    }
+
+    public void PrintCardsAndTotal(string handName)
+    {
+        Console.WriteLine($"{handName}, your cards are:");
+        Console.WriteLine(String.Join(", ", CurrentCards));
+        Console.WriteLine($"The total value of {handName}'s hand is: {TotalValue()}");
+        Console.WriteLine();
+    }
+}
+
+namespace Blackjack
 {
     class Program
     {
+        static void PlayTheGame()
+        {
+            Console.WriteLine("🂡    🂸   🃎   🂹   🃄");
+            Console.WriteLine("Let's play blackjack!");
+            Console.WriteLine("🂭    🃄    🂧   🃓  🂸");
+            Console.WriteLine();
+            var deck = new List<Card>();
+
+            var suits = new List<string>() {
+                "Clubs",
+                "Diamonds",
+                "Hearts",
+                "Spades"
+                };
+
+            var ranks = new List<string>() {
+                "Ace",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "Jack",
+                "Queen",
+                "King"
+                };
+
+            foreach (var suit in suits)
+            {
+                foreach (var rank in ranks)
+                {
+                    var newCard = new Card()
+                    {
+                        Suit = suit,
+                        Rank = rank,
+                    };
+                    deck.Add(newCard);
+                }
+            }
+
+            var numberOfCards = deck.Count;
+
+            for (var rightIndex = numberOfCards - 1; rightIndex > 1; rightIndex--)
+            {
+                var randomNumberGenerator = new Random();
+                var leftIndex = randomNumberGenerator.Next(rightIndex);
+                var leftCard = deck[leftIndex];
+                var rightCard = deck[rightIndex];
+                deck[rightIndex] = leftCard;
+                deck[leftIndex] = rightCard;
+            }
+
+            var player = new Hand();
+
+            var dealer = new Hand();
+
+            for (var numberOfCardsToDeal = 0; numberOfCardsToDeal < 2; numberOfCardsToDeal++)
+            {
+                var card = deck[0];
+                deck.Remove(card);
+                player.AddCard(card);
+            }
+
+            for (var numberOfCardsToDeal = 0; numberOfCardsToDeal < 2; numberOfCardsToDeal++)
+            {
+                var card = deck[0];
+                deck.Remove(card);
+                dealer.AddCard(card);
+            }
+
+            Console.WriteLine($"The dealers first card is {dealer.CurrentCards[0]}");
+            Console.WriteLine();
+
+            var answer = "";
+
+            while (player.TotalValue() < 21 && answer != "stand")
+            {
+                player.PrintCardsAndTotal("Player");
+                Console.Write("Do you want to hit or stand? ");
+                Console.WriteLine();
+                answer = Console.ReadLine().ToLower();
+
+                if (answer == "hit")
+                {
+                    var newCard = deck[0];
+                    deck.Remove(newCard);
+                    player.AddCard(newCard);
+                }
+            }
+
+            player.PrintCardsAndTotal("Player");
+
+            while (player.TotalValue() <= 21 && dealer.TotalValue() <= 17)
+            {
+                var card = deck[0];
+                deck.Remove(card);
+                dealer.AddCard(card);
+            }
+
+            dealer.PrintCardsAndTotal("Dealer");
+
+            if (player.TotalValue() > 21)
+            {
+                Console.WriteLine("Dealer wins!");
+            }
+            else
+            if (dealer.TotalValue() > 21)
+            {
+                Console.WriteLine("Player wins!");
+            }
+            else
+            if (dealer.TotalValue() > player.TotalValue())
+            {
+                Console.WriteLine("Dealer wins!");
+            }
+            else
+            if (player.TotalValue() > dealer.TotalValue())
+            {
+                Console.WriteLine("Player wins!");
+            }
+            else
+            {
+                Console.WriteLine("Dealer wins!");
+            }
+        }
+
         static void Main(string[] args)
         {
-
-            Console.WriteLine("Let's play blackjack!");
-            Console.WriteLine("Type play to play blackjack");
-            var play = Console.ReadLine();
-            while (play == "play")
+            while (true)
             {
+                PlayTheGame();
 
-                // Create a list for ranks
-                var ranks = new List<string>()
-            {
-            "Ace",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "Jack",
-            "Queen",
-            "King",
-            };
+                Console.WriteLine();
+                Console.Write("Keep playing? ");
+                var answer = Console.ReadLine().ToLower();
 
-                // Create a list for suits
-                var suits = new List<string>() {
-            "Clubs",
-            "Diamonds",
-            "Hearts",
-            "Spades",
-            };
-
-                // Create an empty deck list
-                var deck = new List<string>() { };
-
-                // Combine the ranks and suits decks together and add them to the deck list
-                foreach (string suit in suits)
+                if (answer == "no")
                 {
-                    foreach (string rank in ranks)
-                    {
-                        deck.Add($"{rank} of {suit}");
-                    }
-                }
-
-                // Shuffle the deck list
-                var numberOfCards = deck.Count;
-                for (var rightIndex = numberOfCards - 1; rightIndex >= 1; rightIndex--)
-                {
-                    var randomNumberGenerator = new Random();
-                    var leftIndex = randomNumberGenerator.Next(rightIndex);
-                    var leftCard = deck[leftIndex];
-                    var rightCard = deck[rightIndex];
-                    deck[rightIndex] = leftCard;
-                    deck[leftIndex] = rightCard;
-                }
-
-                // Create deck dictionary
-                var deckDict = new Dictionary<string, int>();
-
-                // Add strings from deck list to deckDict and assign a value
-                foreach (string card in deck)
-                {
-                    if (card.Contains("Ace"))
-                        deckDict.Add(card, 11);
-                    if (card.Contains("2"))
-                        deckDict.Add(card, 2);
-                    if (card.Contains("3"))
-                        deckDict.Add(card, 3);
-                    if (card.Contains("4"))
-                        deckDict.Add(card, 4);
-                    if (card.Contains("5"))
-                        deckDict.Add(card, 5);
-                    if (card.Contains("6"))
-                        deckDict.Add(card, 6);
-                    if (card.Contains("7"))
-                        deckDict.Add(card, 7);
-                    if (card.Contains("8"))
-                        deckDict.Add(card, 8);
-                    if (card.Contains("9"))
-                        deckDict.Add(card, 9);
-                    if (card.Contains("10"))
-                        deckDict.Add(card, 10);
-                    if (card.Contains("Jack"))
-                        deckDict.Add(card, 10);
-                    if (card.Contains("Queen"))
-                        deckDict.Add(card, 10);
-                    if (card.Contains("King"))
-                        deckDict.Add(card, 10);
-                }
-
-                // Create a list for the house
-                var houseDeck = new List<string>() { };
-
-                // Starting hand for house
-                houseDeck.Add(deck[0]);
-                deckDict.Remove(deck[0]);
-                houseDeck.Add(deck[1]);
-                deckDict.Remove(deck[1]);
-
-
-                // Calculate house starting hand value
-                // int houseFirstCard = deckDict[deck[0]];
-                // int houseSecondCard = deckDict[deck[1]];
-                // var houseTotalValue = houseFirstCard + houseSecondCard;
-
-                // Create a list for the player
-                var playerDeck = new List<string>() { };
-
-                // Starting hand for player
-                playerDeck.Add(deck[0]);
-                deckDict.Remove(deck[0]);
-                playerDeck.Add(deck[1]);
-                deckDict.Remove(deck[1]);
-
-                // Calculate player starting hand value
-                // var playerFirstCard = deckDict[deck[0]];
-                // var playerSecondCard = deckDict[deck[1]];
-                // var playerTotalValue = playerFirstCard + playerSecondCard;
-
-
-                //Tell the player their starting cards
-                Console.WriteLine("The player has the following cards in their hand.");
-                foreach (var card in playerDeck)
-                {
-                    Console.WriteLine(card);
-                }
-
-                // Calculate the players current total hand
-                // Console.WriteLine($"The player total is {playerTotalValue}");
-
-                // Ask the player if they want to hit or stand
-                Console.WriteLine("Does the player want to hit or stand?");
-                var userInput = Console.ReadLine();
-
-                if (userInput == "hit")
-                {
-                    playerDeck.Add(deck[0]);
-                    deckDict.Remove(deck[0]);
+                    Console.WriteLine("Player quit the game");
+                    break;
                 }
             }
         }
