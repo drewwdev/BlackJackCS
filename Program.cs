@@ -3,8 +3,90 @@ using System.Collections.Generic;
 
 class Deck
 {
-    // shuffle
+    public List<Card> Cards { get; set; } = new List<Card>();
+
+    public Deck()
+    {
+        Initialize();
+        Shuffle();
+    }
+    public void Initialize()
+    {
+        var suits = new List<string>() {
+                "Clubs",
+                "Diamonds",
+                "Hearts",
+                "Spades"
+                };
+
+        var ranks = new List<string>() {
+                "Ace",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "Jack",
+                "Queen",
+                "King"
+                };
+
+        foreach (var suit in suits)
+        {
+            foreach (var rank in ranks)
+            {
+                var newCard = new Card()
+                {
+                    Suit = suit,
+                    Rank = rank,
+                };
+                Cards.Add(newCard);
+            }
+        }
+
+    }
+
+    public void Shuffle()
+    {
+        var numberOfCards = Cards.Count;
+
+        for (var rightIndex = numberOfCards - 1; rightIndex > 1; rightIndex--)
+        {
+            var randomNumberGenerator = new Random();
+            var leftIndex = randomNumberGenerator.Next(rightIndex);
+            var leftCard = Cards[leftIndex];
+            var rightCard = Cards[rightIndex];
+            Cards[rightIndex] = leftCard;
+            Cards[leftIndex] = rightCard;
+        }
+
+    }
+
+    public Card Deal()
+    {
+        var card = Cards[0];
+        Cards.Remove(card);
+        return card;
+    }
+
+    public List<Card> DealMultiple(int numberOfCardsToDeal)
+    {
+        var multipleCards = new List<Card>();
+        for (int count = 0; count < numberOfCardsToDeal; count++)
+        {
+            Card dealtCard = Deal();
+
+            multipleCards.Add(dealtCard);
+        }
+
+        return multipleCards;
+    }
 }
+
 class Card
 {
     public string Rank { get; set; }
@@ -69,6 +151,14 @@ class Hand
         Console.WriteLine($"The total value of {handName}'s hand is: {TotalValue()}");
         Console.WriteLine();
     }
+
+    public void AddCards(List<Card> cardsToAdd)
+    {
+        foreach (Card card in cardsToAdd)
+        {
+            AddCard(card);
+        }
+    }
 }
 
 namespace Blackjack
@@ -77,125 +167,66 @@ namespace Blackjack
     {
         static void PlayTheGame()
         {
-            Console.WriteLine("🂡    🂸   🃎   🂹   🃄");
+            Console.WriteLine("♥️   ♣️   🃟   ♦️   ♠️");
             Console.WriteLine("Let's play blackjack!");
-            Console.WriteLine("🂭    🃄    🂧   🃓  🂸");
+            Console.WriteLine("♥️   ♣️   🃟   ♦️   ♠️");
             Console.WriteLine();
-            var deck = new List<Card>();
 
-            var suits = new List<string>() {
-                "Clubs",
-                "Diamonds",
-                "Hearts",
-                "Spades"
-                };
+            var deck = new Deck();
 
-            var ranks = new List<string>() {
-                "Ace",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                "Jack",
-                "Queen",
-                "King"
-                };
+            var playerHand = new Hand();
 
-            foreach (var suit in suits)
-            {
-                foreach (var rank in ranks)
-                {
-                    var newCard = new Card()
-                    {
-                        Suit = suit,
-                        Rank = rank,
-                    };
-                    deck.Add(newCard);
-                }
-            }
+            var dealerHand = new Hand();
 
-            var numberOfCards = deck.Count;
+            playerHand.AddCards(deck.DealMultiple(2));
 
-            for (var rightIndex = numberOfCards - 1; rightIndex > 1; rightIndex--)
-            {
-                var randomNumberGenerator = new Random();
-                var leftIndex = randomNumberGenerator.Next(rightIndex);
-                var leftCard = deck[leftIndex];
-                var rightCard = deck[rightIndex];
-                deck[rightIndex] = leftCard;
-                deck[leftIndex] = rightCard;
-            }
+            dealerHand.AddCards(deck.DealMultiple(2));
 
-            var player = new Hand();
-
-            var dealer = new Hand();
-
-            for (var numberOfCardsToDeal = 0; numberOfCardsToDeal < 2; numberOfCardsToDeal++)
-            {
-                var card = deck[0];
-                deck.Remove(card);
-                player.AddCard(card);
-            }
-
-            for (var numberOfCardsToDeal = 0; numberOfCardsToDeal < 2; numberOfCardsToDeal++)
-            {
-                var card = deck[0];
-                deck.Remove(card);
-                dealer.AddCard(card);
-            }
-
-            Console.WriteLine($"The dealers first card is {dealer.CurrentCards[0]}");
+            Console.WriteLine($"The dealers first card is {dealerHand.CurrentCards[0]}");
             Console.WriteLine();
 
             var answer = "";
 
-            while (player.TotalValue() < 21 && answer != "stand")
+            while (playerHand.TotalValue() < 21 && answer != "stand")
             {
-                player.PrintCardsAndTotal("Player");
+                playerHand.PrintCardsAndTotal("Player");
                 Console.Write("Do you want to hit or stand? ");
                 Console.WriteLine();
                 answer = Console.ReadLine().ToLower();
 
                 if (answer == "hit")
                 {
-                    var newCard = deck[0];
-                    deck.Remove(newCard);
-                    player.AddCard(newCard);
+                    Card card = deck.Deal();
+                    playerHand.AddCard(card);
                 }
             }
 
-            player.PrintCardsAndTotal("Player");
+            playerHand.PrintCardsAndTotal("Player");
 
-            while (player.TotalValue() <= 21 && dealer.TotalValue() <= 17)
+            while (playerHand.TotalValue() <= 21 && dealerHand.TotalValue() <= 17)
             {
-                var card = deck[0];
-                deck.Remove(card);
-                dealer.AddCard(card);
+                Card card = deck.Deal();
+                dealerHand.AddCard(card);
             }
 
-            dealer.PrintCardsAndTotal("Dealer");
+            dealerHand.PrintCardsAndTotal("Dealer");
 
-            if (player.TotalValue() > 21)
+            if (playerHand.TotalValue() > 21)
             {
                 Console.WriteLine("Dealer wins!");
             }
             else
-            if (dealer.TotalValue() > 21)
+            if (dealerHand.TotalValue() > 21)
             {
                 Console.WriteLine("Player wins!");
             }
             else
-            if (dealer.TotalValue() > player.TotalValue())
+            if (dealerHand.TotalValue() > playerHand.TotalValue())
             {
                 Console.WriteLine("Dealer wins!");
             }
             else
-            if (player.TotalValue() > dealer.TotalValue())
+            if (playerHand.TotalValue() > dealerHand.TotalValue())
             {
                 Console.WriteLine("Player wins!");
             }
